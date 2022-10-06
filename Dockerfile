@@ -15,11 +15,10 @@ RUN curl -fsSL https://pkg.linbit.com/downloads/drbd/9/drbd-${DRBD_VERSION}.tar.
 FROM registry.ci.openshift.org/origin/4.12:machine-os-content
 ENV KERNEL_VERSION 5.17.0
 ENV KERNEL_VERSION_RELEASE 128.fc37
-COPY --from=builder /build/drbd-9.1.11/drbd/*.ko /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}/updates
-RUN rpm-ostree cliwrap install-to-root / \
- && rpm-ostree override replace \
+RUN rpm-ostree override replace \
         https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_VERSION}/${KERNEL_VERSION_RELEASE}/x86_64/kernel-${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64.rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_VERSION}/${KERNEL_VERSION_RELEASE}/x86_64/kernel-core-${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64.rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_VERSION}/${KERNEL_VERSION_RELEASE}/x86_64/kernel-modules-${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64.rpm \
-    && rpm-ostree cleanup -m \
-    && ostree container commit
+    && rpm-ostree cleanup -m
+COPY --from=builder /build/drbd-9.1.11/drbd/*.ko /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64/updates
+RUN ostree container commit
