@@ -20,5 +20,7 @@ RUN rpm-ostree override replace \
         https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_VERSION}/${KERNEL_VERSION_RELEASE}/x86_64/kernel-core-${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64.rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_VERSION}/${KERNEL_VERSION_RELEASE}/x86_64/kernel-modules-${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64.rpm \
     && rpm-ostree cleanup -m
-COPY --from=builder /build/drbd-9.1.11/drbd/*.ko /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64/updates
-RUN ostree container commit
+COPY --from=builder /build/drbd-9.1.11/drbd/*.ko /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64
+RUN rm -rf /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64/kernel/drivers/block/drbd/drbd.ko.xz \
+    && depmod -a -F /lib/modules/${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64/System.map ${KERNEL_VERSION}-${KERNEL_VERSION_RELEASE}.x86_64 \
+    && ostree container commit
